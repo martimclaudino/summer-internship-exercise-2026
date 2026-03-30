@@ -1,5 +1,6 @@
 package com.premiumminds.internship.taskscheduler;
 
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,10 +18,10 @@ public class TaskSchedulerServiceTest {
     }
 
     @Test
-    void testSingleTaskNoDepedencies() {
-        Task a = new Task("A", 1, List.of());
+    void testSingleTaskNoDependencies() {
 
-        List<Task> order = service.getExecutionOrder(List.of(a));
+        Task a = new Task("A", 1, Set.of());
+        List<Task> order = service.getExecutionOrder(Set.of(a));
 
         assertEquals(1, order.size());
         assertEquals("A", order.get(0).getId());
@@ -28,10 +29,10 @@ public class TaskSchedulerServiceTest {
 
     @Test
     void testLinearDependency() {
-        Task a = new Task("A", 1, List.of());
-        Task b = new Task("B", 1, List.of("A"));
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 1, Set.of("A"));
 
-        List<Task> order = service.getExecutionOrder(List.of(b, a));
+        List<Task> order = service.getExecutionOrder(Set.of(b, a));
 
         assertEquals(2, order.size());
         assertEquals("A", order.get(0).getId());
@@ -40,12 +41,13 @@ public class TaskSchedulerServiceTest {
 
     @Test
     void testPriorityBreaksTie() {
-        Task a = new Task("A", 1, List.of());
-        Task b = new Task("B", 2, List.of("A"));
-        Task c = new Task("C", 1, List.of("A"));
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 2, Set.of("A"));
+        Task c = new Task("C", 1, Set.of("A"));
 
-        List<Task> order = service.getExecutionOrder(List.of(a, b, c));
+        List<Task> order = service.getExecutionOrder(Set.of(a, b, c));
 
+        assertEquals(3, order.size());
         assertEquals("A", order.get(0).getId());
         assertEquals("C", order.get(1).getId());
         assertEquals("B", order.get(2).getId());
@@ -53,37 +55,37 @@ public class TaskSchedulerServiceTest {
 
     @Test
     void testCircularDependencyThrows() {
-        Task a = new Task("A", 1, List.of("B"));
-        Task b = new Task("B", 1, List.of("A"));
+        Task a = new Task("A", 1, Set.of("B"));
+        Task b = new Task("B", 1, Set.of("A"));
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.getExecutionOrder(List.of(a, b)));
+                () -> service.getExecutionOrder(Set.of(a, b)));
     }
 
     @Test
     void testMissingDependencyThrows() {
-        Task a = new Task("A", 1, List.of("X"));
+        Task a = new Task("A", 1, Set.of("X"));
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.getExecutionOrder(List.of(a)));
+                () -> service.getExecutionOrder(Set.of(a)));
     }
 
     @Test
     void testEligibleTasksNoDependencies() {
-        Task a = new Task("A", 1, List.of());
-        Task b = new Task("B", 1, List.of());
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 1, Set.of());
 
-        List<Task> eligible = service.getEligibleTasks(List.of(a, b));
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b));
 
         assertEquals(2, eligible.size());
     }
 
     @Test
     void testEligibleTasksWithPendingDependency() {
-        Task a = new Task("A", 1, List.of());
-        Task b = new Task("B", 1, List.of("A"));
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 1, Set.of("A"));
 
-        List<Task> eligible = service.getEligibleTasks(List.of(a, b));
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b));
 
         assertEquals(1, eligible.size());
         assertEquals("A", eligible.get(0).getId());
