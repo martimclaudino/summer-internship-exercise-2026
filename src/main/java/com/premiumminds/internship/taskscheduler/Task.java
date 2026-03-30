@@ -1,15 +1,15 @@
 package com.premiumminds.internship.taskscheduler;
 
-import java.util.List;
+import java.util.Set;
 
 public class Task {
 
     private final String id;
     private final int priority;
-    private final List<String> dependencies;
+    private final Set<String> dependencies;
     private TaskStatus status;
 
-    public Task(String id, int priority, List<String> dependencies) {
+    public Task(String id, int priority, Set<String> dependencies) {
         this.id = id;
         this.priority = priority;
         this.dependencies = dependencies;
@@ -24,7 +24,7 @@ public class Task {
         return priority;
     }
 
-    public List<String> getDependencies() {
+    public Set<String> getDependencies() {
         return dependencies;
     }
 
