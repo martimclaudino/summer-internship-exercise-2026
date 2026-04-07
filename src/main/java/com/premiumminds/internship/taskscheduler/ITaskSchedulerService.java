@@ -8,6 +8,7 @@ public interface ITaskSchedulerService {
     /**
      * Returns all tasks that are currently eligible for execution.
      * A task is eligible if its status is PENDING and all its dependencies are COMPLETED.
+     * Circular depencies should not be checked here.
      *
      * @param tasks the collection of tasks
      * @return eligible tasks ordered by priority (lower value = higher priority)

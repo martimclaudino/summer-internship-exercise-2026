@@ -21,7 +21,7 @@ O sistema deve garantir que:
 * Uma tarefa sem dependências pode ser executada imediatamente.
 * Uma tarefa só pode transitar para `IN_PROGRESS` se todas as suas dependências estiverem `COMPLETED`.
 * Quando múltiplas tarefas estão elegíveis para execução em simultâneo, a prioridade determina a ordem (valores mais baixos têm maior prioridade).
-* Dependências circulares são inválidas e devem ser detetadas.
+* Dependências circulares são inválidas e devem ser detetadas quando necessário.
 * Referências a tarefas inexistentes são inválidas e devem ser detetadas.
 
 ## Exemplo
