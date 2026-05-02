@@ -50,6 +50,12 @@ public class TaskSchedulerService implements ITaskSchedulerService {
         return eligibleTasks;
     }
 
+    // Nota sobre a implementação
+    // Um sistema de agendamento de tarefas realista apenas ordena tarefas, não as executa, 
+    // pelo que não deveria modificar o status das tasks originais, que hão de estar visíveis 
+    // para os trabalhadores. Deveria fazer uma cópia das tasks recebidas e modificá-las.
+    // No entanto, o enunciado diz "um sistema de agendamento de tarefas que as execute",
+    // portanto optei por modificar as tasks originais para simular a execução.
     @Override
     public List<Task> getExecutionOrder(Collection<Task> tasks) {
         List<Task> fullOrder = new ArrayList<>();
