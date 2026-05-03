@@ -56,6 +56,7 @@ public class TaskSchedulerService implements ITaskSchedulerService {
     // para os trabalhadores. Deveria fazer uma cópia das tasks recebidas e modificá-las.
     // No entanto, o enunciado diz "um sistema de agendamento de tarefas que as execute",
     // portanto optei por modificar as tasks originais para simular a execução.
+    // Também decidi aceitar configurações com tarefas Completed e In Progress.
     @Override
     public List<Task> getExecutionOrder(Collection<Task> tasks) {
         List<Task> fullOrder = new ArrayList<>();
