@@ -59,11 +59,15 @@ public class TaskSchedulerService implements ITaskSchedulerService {
     @Override
     public List<Task> getExecutionOrder(Collection<Task> tasks) {
         List<Task> fullOrder = new ArrayList<>();
+        int notPendingTasks = 0;
         
         // Mapping tasks for their id, only to check dependencies with less complexity
         Map<String, Task> taskMap = new HashMap<>();
         for (Task t : tasks) {
             taskMap.put(t.getId(), t);
+            if (t.getStatus() == TaskStatus.COMPLETED || t.getStatus() == TaskStatus.IN_PROGRESS) {
+                notPendingTasks++;
+            }
         }
 
         // Check for missing dependencies
@@ -75,7 +79,7 @@ public class TaskSchedulerService implements ITaskSchedulerService {
             }
         }
 
-        while (fullOrder.size() != tasks.size()) {
+        while (fullOrder.size() != tasks.size() - notPendingTasks) {
             
             // Get eligible tasks
             List<Task> tasksToExecute = getEligibleTasks(tasks);

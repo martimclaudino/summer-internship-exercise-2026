@@ -147,8 +147,8 @@ public class TaskSchedulerServiceTest {
         Task a = new Task("A", 1, Set.of());
         a.setStatus(TaskStatus.COMPLETED);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> service.getExecutionOrder(Set.of(a)));
+        List<Task> order = service.getExecutionOrder(Set.of(a));
+        assertEquals(0, order.size());
     }
 
     @Test
@@ -157,8 +157,9 @@ public class TaskSchedulerServiceTest {
         a.setStatus(TaskStatus.COMPLETED);
         Task b = new Task("B", 1, Set.of());
         
-        assertThrows(IllegalArgumentException.class,
-                () -> service.getExecutionOrder(Set.of(a, b)));
+        List<Task> order = service.getExecutionOrder(Set.of(a, b));
+        assertEquals(1, order.size());
+        assertEquals("B", order.get(0).getId());
     }
 
     @Test
@@ -167,8 +168,9 @@ public class TaskSchedulerServiceTest {
         a.setStatus(TaskStatus.COMPLETED);
         Task b = new Task("B", 1, Set.of("A"));
         
-        assertThrows(IllegalArgumentException.class,
-                () -> service.getExecutionOrder(Set.of(a, b)));
+        List<Task> order = service.getExecutionOrder(Set.of(a, b));
+        assertEquals(1, order.size());
+        assertEquals("B", order.get(0).getId());
     }
 
     @Test
@@ -182,6 +184,20 @@ public class TaskSchedulerServiceTest {
     }
 
     @Test
+    void testEligibleOrderTasksNoDependencies() {
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 2, Set.of());
+        Task c = new Task("C", 3, Set.of());
+
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b, c));
+
+        assertEquals(3, eligible.size());
+        assertEquals("A", eligible.get(0).getId());
+        assertEquals("B", eligible.get(1).getId());
+        assertEquals("C", eligible.get(2).getId());
+    }
+
+    @Test
     void testEligibleTasksWithPendingDependency() {
         Task a = new Task("A", 1, Set.of());
         Task b = new Task("B", 1, Set.of("A"));
@@ -190,5 +206,92 @@ public class TaskSchedulerServiceTest {
 
         assertEquals(1, eligible.size());
         assertEquals("A", eligible.get(0).getId());
+    }
+
+    @Test
+    void testEligibleTasksWithPendingDependencies() {
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 2, Set.of("A"));
+        Task c = new Task("C", 3, Set.of("B"));
+
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b, c));
+
+        assertEquals(1, eligible.size());
+        assertEquals("A", eligible.get(0).getId());
+    }
+
+    @Test
+    void testEligibleTasksWithMultiplePendingDependencies() {
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 2, Set.of("A"));
+        Task c = new Task("C", 3, Set.of("B"));
+        Task d = new Task("D", 4, Set.of("B", "C"));
+
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b, c, d));
+
+        assertEquals(1, eligible.size());
+        assertEquals("A", eligible.get(0).getId());
+    }
+
+    @Test
+    void testEligibleTasksWithMultipleCompletedDependencies() {
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 2, Set.of());
+        Task c = new Task("C", 3, Set.of());
+        Task d = new Task("D", 4, Set.of("A", "B", "C"));
+        a.setStatus(TaskStatus.COMPLETED);
+        b.setStatus(TaskStatus.COMPLETED);
+        c.setStatus(TaskStatus.COMPLETED);
+
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b, c, d));
+
+        assertEquals(1, eligible.size());
+        assertEquals("D", eligible.get(0).getId());
+    }
+
+    @Test
+    void testEligibleInProgressAndCompletedTasks() {
+        Task a = new Task("A", 1, Set.of());
+        Task b = new Task("B", 2, Set.of());
+        Task c = new Task("C", 3, Set.of());
+        Task d = new Task("D", 4, Set.of());
+        a.setStatus(TaskStatus.IN_PROGRESS);
+        b.setStatus(TaskStatus.IN_PROGRESS);
+        c.setStatus(TaskStatus.COMPLETED);
+        d.setStatus(TaskStatus.COMPLETED);
+
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b, c, d));
+
+        assertEquals(0, eligible.size());
+    }
+
+    @Test
+    void testEligibleEmptyCollectionOfTasks() {
+        List<Task> eligible = service.getEligibleTasks(Set.of());
+
+        assertEquals(0, eligible.size());
+    }
+
+    // Como requerido no enunciado, getEligibleTasks() não lança excepções
+    // No entanto, tem uma verificação para não dar erro quando falta uma dependency
+    @Test
+    void testEligibleMissingDependencies() {
+        Task a = new Task("A", 1, Set.of("B", "C"));
+
+        List<Task> eligible = service.getEligibleTasks(Set.of(a));
+
+        assertEquals(0, eligible.size());
+    }
+
+    @Test
+    void testEligibleAllTasksHaveDependencies() {
+        Task a = new Task("A", 1, Set.of());
+        a.setStatus(TaskStatus.IN_PROGRESS);
+        Task b = new Task("B", 2, Set.of("A"));
+        Task c = new Task("C", 3, Set.of("C"));
+
+        List<Task> eligible = service.getEligibleTasks(Set.of(a, b, c));
+
+        assertEquals(0, eligible.size());
     }
 }
